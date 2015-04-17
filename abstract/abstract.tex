@@ -7,15 +7,13 @@
 \begin{document}
 \maketitle
 
-In parametric clustering, groups are usually formed from the components of a finite mixture distribution. The method consists of two steps: first, a finite mixture distribution with probability density function
+In parametric clustering, groups are usually formed from the components of a finite mixture distribution. The method comprises two steps: first, a finite mixture distribution with  the following probability density function
 \[
 f(\;\cdot\; ; \pi_1, \dots, \pi_k, \theta_1 \dots \theta_k) = \pi_1  f (\;\cdot\; ; \theta_1) + \dots + \pi_k f(\;\cdot\; ; \theta_k)
 \]
-is fitted to the data set.  In a second step, each observation $x$ is assigned to the component $j$, $1\leq j \leq k$, with $\hat{\pi}_j f( x ; \hat{\theta}_j)$ maximum. After the fitting process, some mixture components might not be separated enough. 
+is fitted to a data set; second, each observation $x$ is assigned to the component $j$, $1\leq j \leq k$, with $\hat{\pi}_j f( x ; \hat{\theta}_j)$ maximum. After the fitting process, some mixture components might not be separated enough. To deal with this situation, several authors have proposed merging methods that, based on the posterior probabilities incrementally, combine those components that are more similar. 
 
-To deal with this situation, several authors have proposed merging methods based on the posterior probabilities. These methods use  the information contained in the posterior probabilities to incrementally combine those components which are more similar. 
-
-Using a generic definition, an integrated formulation to unify the different approaches is presented. In addition, this new formulation opens the way to define new approaches.
+Using a generic definition, an integrated formulation to unify such merging methods is presented and discussed. This new formulation opens the way to define new methods based on the posterior probabilities.
 
 %
 %  BAUDRY, J.-P., RAFTERY A.~E., CELEUXx, G., LO, K., and GOTTARDO, R. (2010). Combining Mixture Components for Clustering. {\em Journal of Computational and Graphical Statistics}, 9(2):332-353.
