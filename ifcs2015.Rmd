@@ -7,3 +7,65 @@ output:
     toc: yes
 ---
 
+```{r, include=FALSE}
+library(ggplot2)
+library(mclust)
+library(dplyr)
+library(mixpack)
+library(grid)
+library(gridBase)
+library(abind)
+options(width=200)
+knitr::opts_chunk$set(comment = " ", echo = FALSE, warning = FALSE)
+
+source('testing_samples.R')
+X = test1(100)
+```
+
+# Introduction to the problem of merging components
+
+In this talk we focus on methods to merge the components of a finite mixture model hierarchically, in such a way that the merged components are considered as a unique component. Doing so, when we cluster our observations using the finite mixture distribution, we can consider the merged components to be a unique cluster.
+
+# Stating the problem
+
+Given a sample of probabilities to belong to each component $I_j$,
+
+\[ \left[ \begin{array}{ccccc}
+(\tau_{11}, & \dots & \tau_{1j}, & \dots & \tau_{1k}), \\
+\vdots      & &    \vdots                     & &    \vdots                     \\
+(\tau_{i1}, & \dots & \tau_{ij}, & \dots & \tau_{ik}), \\
+\vdots      & &      \vdots                   & &       \vdots                  \\
+(\tau_{n1}, & \dots & \tau_{nj}, & \dots & \tau_{nk})
+\end{array} \right] 
+\in \mathcal{S}^k \]
+
+merge the components (sequentially) to obtain a hierarchy over the set of components.
+
+<video controls="controls" loop="loop"><source src="merging_animation.webm" />Merging animation</video>
+
+
+# Our proposal: a general merging score
+
+Given the set of components $\mathcal{I}_s = \{I_1, \dots, I_s\}$ and $\mathcal{T}_{\mathcal{I}_s} = \{\tau_{1 \mathcal{I}_s}, \dots, \tau_{n \mathcal{I}_s} \}$, we propose to merge those two components $I_a$ and $I_b$, into one component $I_a \cup I_b$ which maximise
+\[
+S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} \color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} }.
+\]
+
+  * The function $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how likely is to merge component $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$.
+  * The function $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how relevant is observation $i$ to compute the overall score to merge $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$.
+
+
+# The DEMP approach [Hennig (2010)]
+
+  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{b}}$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \mathbb{1}\left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$
+
+# The entropy approach [Baudry et el. (2010)]
+
+  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = (\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$
+
+# Longoford & Bartosova [Longford & Bartosova (2014)]
+
+Using the posterior probabilities $\mathcal{T}_{\mathcal{I}_s}^*$ of a simulated sample from components $\mathcal{I}_s = \{I_1, \dots, I_s\}$
+
+  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$
+
