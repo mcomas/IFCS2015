@@ -5,6 +5,11 @@
 *.log
 *.aux
 *.gz
-
+*.nav
+*.snn
+*.toc
+*.tex
+figure/
+Rplots.pdf
 
 sim01/data/*
