@@ -5,3 +5,6 @@
 *.log
 *.aux
 *.gz
+
+
+sim01/data/*
