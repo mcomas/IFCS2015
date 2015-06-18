@@ -1,3 +1,15 @@
+if(!exists('MAXOVERLAP')) MAXOVERLAP = '001'
+if(!exists('NSIM')) NSIM = '050'
+if(!exists('NDATA')) NDATA = '200'
+if(!exists('K0')) K0 = '003'
+if(!exists('Kf')) Kf = '009'
+if(!exists('DIM')) DIM = '005'
+if(!exists('SEED')) SEED = '078'
+
+IFILE = sprintf("data/d-MAXOVERLAP_%s-NSIM_%s-NDATA_%s-K0_%s-Kf_%s-DIM_%s-SEED_%s.RData", 
+                MAXOVERLAP, NSIM, NDATA, K0, Kf, DIM, SEED)
+load(IFILE)
+
 suppressMessages( library(mixpack) )
 
 # source('sim01/models.R')

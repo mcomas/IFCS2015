@@ -15,4 +15,4 @@ data/d-%.RData : build_data.R
 	Rscript -e 'sapply(strsplit(strsplit("$*","-")[[1]],"_"),function(v,e)assign(v[1],as.numeric(v[2]),e),environment()); source("$<")'
 
 data/h-%.RData : $(DGEN) hpartition_fitting.R models.R 
-	Rscript -e 'sapply(strsplit(strsplit("$*","-")[[1]],"_"),function(v,e)assign(v[1],v[2],e),environment()); source("models.R"); lambda = l_lambda[[lambda]]; omega = l_omega[[omega]]; load("$<"); source("hpartition_fitting.R"); save(HP, file="$@")'
+	Rscript -e 'sapply(strsplit(strsplit("$*","-")[[1]],"_"),function(v,e)assign(v[1],v[2],e),environment()); source("models.R"); lambda = l_lambda[[lambda]]; omega = l_omega[[omega]]; source("hpartition_fitting.R"); save(HP, file="$@")'
