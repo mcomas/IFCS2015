@@ -83,3 +83,44 @@ Using the posterior probabilities $\mathcal{T}_{\mathcal{I}_s}^*$ of a simulated
 
 # Performance
 
+## Experiment
+
+We have considered the following experiment. 
+
+  * For differents values of $\hat{\omega} \in (0, 0.5)$,
+  
+    1. Generate a $X$ sample of $N_{\text{data}}$ observations following a mixtures of $K_0$ components. For each element from sample $X$ keep the label from the component it was generated to obtain a labeling $L_0$. The mixtures components are separated with fixed $\hat{\omega}$ maxoverlapping measure.
+    2. Fit a mixture with $K_f$ components ($K_f > K_0$) to sample $X$ and calculate the posterior probabilities $\tau_i = \left(\tau_{i1}, \dots, \tau_{i K_f}\right)$ for each element $x_i \in X$ to obtain $T = \{ \tau_1, \dots, \tau_{N_{\text{data}}} \}$.
+    3. Obtain a hierachy $\mathcal{H}$ over the $K_f$ components using a fixed function $\color{red}{\lambda}$ and $\color{blue}{\omega}$.
+    4. Compare the classification given at level $K_0$ of hierarchy $\mathcal{H}$ with the classification given by $L_0$ obtaining and score $s_i$.
+
+For each function $\color{red}{\lambda}$ and $\color{blue}{\omega}$ we have repeated the experiment $N_\text{sim}$ times and computes the mean $\bar{s} = \sum_{i=1}^{N_\text{sim}} s_i$
+
+## Results 
+
+* $N_{\text{sim}} = 50$, $N_{\text{data}} = 200$, $K_0=3$, $K_f=9$, $\text{seed}=1$ and $\text{dimension}=5$.
+
+```{r, fig.width=9, fig.height=5}
+load('sim01/data/res_NSIM_050-NDATA_200-K0_003-Kf_009-DIM_005-SEED_001.RData')
+res.mean = res %>% group_by(omega, lambda, overlap, method) %>% summarise(AR = mean(AR))
+ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) + 
+  facet_grid(omega~lambda) + theme_bw()
+```
+
+* $N_{\text{sim}} = 50$, $N_{\text{data}} = 200$, $K_0=3$, $K_f=12$, $\text{seed}=1$ and $\text{dimension}=5$.
+
+```{r, fig.width=9, fig.height=5}
+load('sim01/data/res_NSIM_050-NDATA_200-K0_003-Kf_012-DIM_005-SEED_001.RData')
+res.mean = res %>% group_by(omega, lambda, overlap, method) %>% summarise(AR = mean(AR))
+ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) + 
+  facet_grid(omega~lambda) + theme_bw()
+```
+
+* $N_{\text{sim}} = 50$, $N_{\text{data}} = 200$, $K_0=3$, $K_f=9$, $\text{seed}=1$ and $\text{dimension}=10$.
+
+```{r, fig.width=9, fig.height=5}
+load('sim01/data/res_NSIM_050-NDATA_200-K0_003-Kf_009-DIM_010-SEED_001.RData')
+res.mean = res %>% group_by(omega, lambda, overlap, method) %>% summarise(AR = mean(AR))
+ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) + 
+  facet_grid(omega~lambda) + theme_bw()
+```
