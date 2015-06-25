@@ -1,9 +1,12 @@
 ---
-title: "An integrated formulation for merging mixture components based on posterior probabilities (IFCS'15)"
+title: An integrated formulation for merging mixture components based on posterior
+  probabilities (IFCS'15)
 author: "Marc Comas-Cufí, Josep Antoni Martín-Fernández and Glòria Mateu-Figueras"
 date: "July 8th, 2015"
-output: 
-  html_document: 
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     theme: cosmo
     toc: yes
 ---
@@ -16,6 +19,7 @@ library(mixpack)
 library(grid)
 library(gridBase)
 library(abind)
+library(pander)
 options(width=200)
 knitr::opts_chunk$set(comment = " ", echo = FALSE, warning = FALSE)
 
@@ -25,62 +29,143 @@ X = test1(100)
 
 # Introduction to the problem of merging components
 
-In this talk we focus on methods used to merge the components of a finite mixture model hierarchically, in such a way that the merged components are considered as a unique component. Doing so, when we cluster our observations using the finite mixture distribution, we can consider the merged components to be a unique cluster. 
+In this talk we focus on methods used to merge the components of a finite mixture model hierarchically. The merging process is going to be done sequentially. After each merging step, the merged components are considered as a unique component. 
 
 <video controls="controls" loop="loop"><source src="merging_animation.webm" />Merging animation</video>
 
+No that after merging different components into a single component, we can consider this single component to define a single cluster, and therefore, to group an observation to this cluster if the probability to belong to this single component is highest than the probability to belong to the other components. This approach is classical and it is called the maximum a posterior criterion (MAP criterion).
 
 # Merging components based on the posterior probabilities
 
-We propose to merge the components of a finite mixture using the information contained only in the posterior probabilities.
+We focus only on merging the components of a finite mixture using the information contained only in the posterior probabilities. The problem of interest can be stated as:
 
-Given a sample of probabilities to belong to each component $I_j$,
+> Given a sample of probabilities to belong to each component $I_j$,
+>
+> \[ \left[ \begin{array}{ccccc}
+> (\tau_{11}, & \dots & \tau_{1j}, & \dots & \tau_{1k}), \\
+> \vdots      & &    \vdots                     & &    \vdots                     \\
+> (\tau_{i1}, & \dots & \tau_{ij}, & \dots & \tau_{ik}), \\
+> \vdots      & &      \vdots                   & &       \vdots                  \\
+> (\tau_{n1}, & \dots & \tau_{nj}, & \dots & \tau_{nk})
+> \end{array} \right] 
+> \in \mathcal{S}^k \]
+>
+> merge the components (sequentially) to obtain a hierarchy over the set of components.
 
-\[ \left[ \begin{array}{ccccc}
-(\tau_{11}, & \dots & \tau_{1j}, & \dots & \tau_{1k}), \\
-\vdots      & &    \vdots                     & &    \vdots                     \\
-(\tau_{i1}, & \dots & \tau_{ij}, & \dots & \tau_{ik}), \\
-\vdots      & &      \vdots                   & &       \vdots                  \\
-(\tau_{n1}, & \dots & \tau_{nj}, & \dots & \tau_{nk})
-\end{array} \right] 
-\in \mathcal{S}^k \]
+# Our proposal: a generic merging score
 
-merge the components (sequentially) to obtain a hierarchy over the set of components.
+To solve the stated problem, we propose:
 
-# Our proposal: a general merging score
-
-Given the set of components $\mathcal{I}_s = \{I_1, \dots, I_s\}$ and $\mathcal{T}_{\mathcal{I}_s} = \{\tau_{1 \mathcal{I}_s}, \dots, \tau_{n \mathcal{I}_s} \}$, we propose to merge those two components $I_a$ and $I_b$, into one component $I_a \cup I_b$ which maximise
+> Given the set of components $\mathcal{I}_s = \{I_1, \dots, I_s\}$ and $\mathcal{T}_{\mathcal{I}_s} = \{\tau_{1 \mathcal{I}_s}, \dots, \tau_{n \mathcal{I}_s} \}$, we propose to merge those two components $I_a$ and $I_b$, into one component $I_a \cup I_b$ which maximise
 \[
-S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} \color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} }.
+S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} \color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} },
+\]
+> 
+> where 
+> 
+>   * the function $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how likely is to merge component $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$ and
+>   * the function $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how relevant is observation $i$ to compute the overall score to merge $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$.
+
+Our proposal is generic in the sense that we do not define the measure used to combine the components. The user can define the functions $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ and $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ according to their problem.
+
+In next sections, we show different ideas appeared in different works into the presented framework.
+
+## The DEMP approach [Hennig (2010)]
+
+Hennig (2010) proposed a method based on maximizing the Directly Estimated Missclassification Probabilities (DEMP approach). It is easy to show that the DEMP apprach is equivalent to the general score $S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b)$ using 
+
+  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{a}}$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \mathbb{1}\left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$.
+
+## The entropy approach [Baudry et el. (2010)]
+
+Baudry _et al._ (2010) proposed to merged the component of a finite mixture based on minimizing the total Entropy
+
+\[
+\sum_{i=1}^n \sum_{j=1}^s \tau_{i \mathcal{I}_j} log(\tau_{i \mathcal{I}_j}).
 \]
 
-  * The function $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how likely is to merge component $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$.
-  * The function $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how relevant is observation $i$ to compute the overall score to merge $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$.
-
-## Particular cases:
-### The DEMP approach [Hennig (2010)]
-
-  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{b}}$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \mathbb{1}\left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$
-
-### The entropy approach [Baudry et el. (2010)]
+In this case, it can be seen that their approach is equivalent to the general score $S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b)$ using
 
   * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = (\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$
 
-### Longford & Bartosova [Longford & Bartosova (2014)]
+## Longford & Bartosova [Longford & Bartosova (2014)]
 
-Using the posterior probabilities $\mathcal{T}_{\mathcal{I}_s}^*$ of a simulated sample from components $\mathcal{I}_s = \{I_1, \dots, I_s\}$
+Longford & Bartosova (2014) proposed to merge those two components maximizing the probability of classifying an observation to component $I_a$ given that the observation is generated by either $I_a$ or $I_b$. To aproximate such probability a simulated sample $X^*$ of finite mixture with components $\mathcal{I}_s = \{I_1, \dots, I_s\}$. Using the posterior probabilities $\mathcal{T}_{\mathcal{I}_s}^*$ of this simulated sample their approach is equivalent to the score $S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b)$ using
 
   * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$
 
-### The log-ratio criterias
+# New aproaches using the generic merging score
+
+Each previous methods have considerd different functions $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$; 
+
+* $\mathbb{1}\left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$ for the DEMP approach
+* $(\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$ for the entropy approach, and
+* $\frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$ for the version of Longford & Bartosova
+
+we use the labels `demp`, `entr` and `demp.mod` to refenciate each function respectively. Moreover, for the previous three methods we have seen two different possible definitions of $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$
+
+* $\tau_{i I_{a}}$ for the DEMP approach and
+* $1$ for the approach presented by Baudry _et al._ and for the one by Longford & Bartosova.
+
+we refer to them as `prop` and `cnst`. Doing so, we are be able to refer to each method using the label for function $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ followed by the label refering to function $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$. For example, 
+
+* we refer to the DEMP approach as `prop-demp`,
+* we refer to Baudry approach as `cnst-entr` and
+* we refer to Longford and Bartosova as `cnst-demp.mod`.
+
+Using this labeling, we can define three new approaches corresponding to the labelings `prop-entr`, `prop-demp.mod` and `cnst-demp`.
+
+```{r, results='asis'}
+(df <- data.frame(
+  'Lambda.Omega' = c('demp', 'demp.mod', 'entr'),
+  'cnst' = c('cnst-demp', 'Longford & Bartosova (2014)', 'Baudry et al. (2010)'),
+  'prop' = c('Hennig (2010)', 'prop-demp.mod', 'prop-entr')  )) %>% pandoc.table(., style='rmarkdown', split.tables = Inf, emphasize.strong.cols= 1)
+```
+
+## Using the indicator variable as a weighting function
+
+In previous approaches we have used either $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ (`cnst`) or $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{b}}$ (`prop`). In the first each observation is ponderated equally, in the second approach each observation is ponderated according to the posterior probability to belong to $I_a$. A more extrem weighting can be introduced considering only those observations having the posterior of being classified to $I_a$ maximum, that is $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \mathbb{1}\left( \forall j\; \tau_{i I_{a}} \geq \tau_{iI_j} \right)$. We refer to this weighing by `dich`. This new weighting allow us to introduce three new approaches.
+
+```{r, results='asis'}
+(df <- cbind(df ,
+  data.frame('dich' = c('dich-demp', 'dich-demp.mod', 'dich-entr')))) %>% pandoc.table(., style='rmarkdown', split.tables = Inf, emphasize.strong.cols= 1)
+```
+
+## Using simply the posterior probability of being classified to $I_b$
+
+A very simple function measuring how likely is to classify observation into $I_b$ when the observations are from $I_a$, is to consider simply the posterior probability of classifying to $I_b$, that is $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{b}}$. The measure is similar to the one introduced by Longford & Bartosova, but in this case we are not assuming that the observation has been generated either by component $I_a$ or $I_b$.
+
+We refer to this approach as `prop` (not to be confused with the `prop` labeling used for the function $\color{blue}{\omega}$). With this new function we have three new approaches to merge components.
+
+```{r, results='asis'}
+(df <- rbind(df, data.frame('Lambda.Omega'='prop', 'cnst' = 'cnst-prop', 'prop' = 'prop-prop', 'dich' = 'dich-prop')) )%>% pandoc.table(., style='rmarkdown', split.tables = Inf, emphasize.strong.cols= 1)
+```
+
+## The log-ratio criterias
+
+The log-ratio between the posterior probability of classifying an observation to $I_b$ and the posterior probability of classifying an observation to $I_a$ is a measure of how likely is to classify an observation to $I_b$ when the observation was in fact generated by component $I_a$. This measure can be used to measure how likely is to merge components $I_a$ and $I_b$.
 
   * Consider $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = log(\tau_{i I_{b}} / \tau_{i I_{a}})$
 
-### The Aitchison distance criteria
+This approach allow us to introduce three new methods for merging components
+
+```{r, results='asis'}
+(df <- rbind(df, data.frame('Lambda.Omega'='log', 'cnst' = 'cnst-log', 'prop' = 'prop-log', 'dich' = 'dich-log')) )%>% pandoc.table(., style='rmarkdown', split.tables = Inf, emphasize.strong.cols= 1)
+```
+
+## The Aitchison distance criteria
+
+Finally, using the norm defined on the Simplex (Aitchison) we can have a measure of entropy similar to the one introduced by Baudry et al. (2010). In this case, the measure has some desirable properties like scale-invariance and compositional-coherence.
 
   * Consider $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = - log(\tau_{i I_{b}} / \tau_{i I_{a}})^2$
 
-## Experiment: comparing the results for each aproach
+We have three new methods
+
+```{r, results='asis'}
+(df <- rbind(df, data.frame('Lambda.Omega'='norm', 'cnst' = 'cnst-norm', 'prop' = 'prop-norm', 'dich' = 'dich-norm')) )%>% pandoc.table(., style='rmarkdown', split.tables = Inf, emphasize.strong.cols= 1)
+```
+
+# Experiment: comparing the results for each aproach
 
 We have considered the following experiment. 
 
@@ -93,7 +178,7 @@ We have considered the following experiment.
 
 For each function $\color{red}{\lambda}$ and $\color{blue}{\omega}$ we have repeated the experiment $N_\text{sim}$ times and computes the mean $\bar{s} = \sum_{i=1}^{N_\text{sim}} s_i$
 
-### Results 
+## Results 
 
 * $N_{\text{sim}} = 50$, $N_{\text{data}} = 200$, $K_0=3$, $K_f=9$, $\text{seed}=1$ and $\text{dimension}=5$.
 
