@@ -1,0 +1,6 @@
+#/bin/bash
+
+TODAY=`date +%Y%m%d`
+url=IFCS2015
+
+rsync -avzL --delete www/ -e ssh puntdtro@mcomas.net:~/public_html/$url/
