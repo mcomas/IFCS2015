@@ -20,6 +20,8 @@ library(grid)
 library(gridBase)
 library(abind)
 library(pander)
+library(MixSim)
+library(Rmixmod)
 options(width=200)
 knitr::opts_chunk$set(comment = " ", echo = FALSE, warning = FALSE)
 
@@ -27,11 +29,12 @@ source('testing_samples.R')
 X = test1(100)
 ```
 
+
 # Introduction to the problem of merging components
 
 In this talk we focus on methods used to merge the components of a finite mixture model hierarchically. The merging process is going to be done sequentially. After each merging step, the merged components are considered as a unique component. 
 
-<video controls="controls" loop="loop"><source src="merging_animation.webm" />Merging animation</video>
+<video controls="controls" loop="loop"><source src="merging_animation.webm" />[[Merging animation]]</video>
 
 No that after merging different components into a single component, we can consider this single component to define a single cluster, and therefore, to group an observation to this cluster if the probability to belong to this single component is highest than the probability to belong to the other components. This approach is classical and it is called the maximum a posterior criterion (MAP criterion).
 
@@ -58,15 +61,15 @@ To solve the stated problem, we propose:
 
 > Given the set of components $\mathcal{I}_s = \{I_1, \dots, I_s\}$ and $\mathcal{T}_{\mathcal{I}_s} = \{\tau_{1 \mathcal{I}_s}, \dots, \tau_{n \mathcal{I}_s} \}$, we propose to merge those two components $I_a$ and $I_b$, into one component $I_a \cup I_b$ which maximise
 \[
-S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} \color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}{\sum_{i=1}^n \color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} },
+S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n {\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} {\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}}{\sum_{i=1}^n {\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} }},
 \]
 > 
 > where 
 > 
->   * the function $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how likely is to merge component $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$ and
->   * the function $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ measures how relevant is observation $i$ to compute the overall score to merge $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$.
+>   * the function ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$ measures how likely is to merge component $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$ and
+>   * the function ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$ measures how relevant is observation $i$ to compute the overall score to merge $I_a$ and $I_b$ given the information contained in $\tau_{i \mathcal{I}_s}$.
 
-Our proposal is generic in the sense that we do not define the measure used to combine the components. The user can define the functions $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ and $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ according to their problem.
+Our proposal is generic in the sense that we do not define the measure used to combine the components. The user can define the functions ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$ and ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$ according to their problem.
 
 In next sections, we show different ideas appeared in different works into the presented framework.
 
@@ -74,7 +77,7 @@ In next sections, we show different ideas appeared in different works into the p
 
 Hennig (2010) proposed a method based on maximizing the Directly Estimated Missclassification Probabilities (DEMP approach). It is easy to show that the DEMP apprach is equivalent to the general score $S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b)$ using 
 
-  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{a}}$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \mathbb{1}\left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$.
+  * ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{a}}$ and ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1{\hskip -2.4 pt}\hbox{I} \left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$.
 
 ## The entropy approach [Baudry et el. (2010)]
 
@@ -86,28 +89,28 @@ Baudry _et al._ (2010) proposed to merged the component of a finite mixture base
 
 In this case, it can be seen that their approach is equivalent to the general score $S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b)$ using
 
-  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = (\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$
+  * ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1$ and ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = (\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$
 
 ## Longford & Bartosova [Longford & Bartosova (2014)]
 
 Longford & Bartosova (2014) proposed to merge those two components maximizing the probability of classifying an observation to component $I_a$ given that the observation is generated by either $I_a$ or $I_b$. To aproximate such probability a simulated sample $X^*$ of finite mixture with components $\mathcal{I}_s = \{I_1, \dots, I_s\}$. Using the posterior probabilities $\mathcal{T}_{\mathcal{I}_s}^*$ of this simulated sample their approach is equivalent to the score $S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b)$ using
 
-  * $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ and $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$
+  * ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1$ and ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$
 
 # New aproaches using the generic merging score
 
-Each previous methods have considerd different functions $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$; 
+Each previous methods have considerd different functions ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$; 
 
-* $\mathbb{1}\left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$ for the DEMP approach
+* $1{\hskip -2.4 pt}\hbox{I} \left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$ for the DEMP approach
 * $(\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$ for the entropy approach, and
 * $\frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$ for the version of Longford & Bartosova
 
-we use the labels `demp`, `entr` and `demp.mod` to refenciate each function respectively. Moreover, for the previous three methods we have seen two different possible definitions of $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$
+we use the labels `demp`, `entr` and `demp.mod` to refenciate each function respectively. Moreover, for the previous three methods we have seen two different possible definitions of ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$
 
 * $\tau_{i I_{a}}$ for the DEMP approach and
 * $1$ for the approach presented by Baudry _et al._ and for the one by Longford & Bartosova.
 
-we refer to them as `prop` and `cnst`. Doing so, we are be able to refer to each method using the label for function $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}$ followed by the label refering to function $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}$. For example, 
+we refer to them as `prop` and `cnst`. Doing so, we are be able to refer to each method using the label for function ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$ followed by the label refering to function ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}}$. For example, 
 
 * we refer to the DEMP approach as `prop-demp`,
 * we refer to Baudry approach as `cnst-entr` and
@@ -124,18 +127,18 @@ Using this labeling, we can define three new approaches corresponding to the lab
 
 ## Using the indicator variable as a weighting function
 
-In previous approaches we have used either $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = 1$ (`cnst`) or $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{b}}$ (`prop`). In the first each observation is ponderated equally, in the second approach each observation is ponderated according to the posterior probability to belong to $I_a$. A more extrem weighting can be introduced considering only those observations having the posterior of being classified to $I_a$ maximum, that is $\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \mathbb{1}\left( \forall j\; \tau_{i I_{a}} \geq \tau_{iI_j} \right)$. We refer to this weighing by `dich`. This new weighting allow us to introduce three new approaches.
+In previous approaches we have used either ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1$ (`cnst`) or ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{b}}$ (`prop`). In the first each observation is ponderated equally, in the second approach each observation is ponderated according to the posterior probability to belong to $I_a$. A more extrem weighting can be introduced considering only those observations having the posterior of being classified to $I_a$ maximum, that is ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1{\hskip -2.4 pt}\hbox{I} \left( \forall j\; \tau_{i I_{a}} \geq \tau_{iI_j} \right)$. We refer to this weighing by `dich`. This new weighting allow us to introduce three new approaches.
 
 ```{r, results='asis'}
 (df <- cbind(df ,
   data.frame('dich' = c('dich-demp', 'dich-demp.mod', 'dich-entr')))) %>% pandoc.table(., style='rmarkdown', split.tables = Inf, emphasize.strong.cols= 1)
 ```
 
-## Using simply the posterior probability of being classified to $I_b$
+## Using the posterior probability of being classified to $I_b$
 
-A very simple function measuring how likely is to classify observation into $I_b$ when the observations are from $I_a$, is to consider simply the posterior probability of classifying to $I_b$, that is $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = \tau_{i I_{b}}$. The measure is similar to the one introduced by Longford & Bartosova, but in this case we are not assuming that the observation has been generated either by component $I_a$ or $I_b$.
+A very simple function measuring how likely is to classify observation into $I_b$ when the observations are from $I_a$, is to consider simply the posterior probability of classifying to $I_b$, that is ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{b}}$. The measure is similar to the one introduced by Longford & Bartosova, but in this case we are not assuming that the observation has been generated either by component $I_a$ or $I_b$.
 
-We refer to this approach as `prop` (not to be confused with the `prop` labeling used for the function $\color{blue}{\omega}$). With this new function we have three new approaches to merge components.
+We refer to this approach as `prop` (not to be confused with the `prop` labeling used for the function ${\color{blue}{\omega}}$). With this new function we have three new approaches to merge components.
 
 ```{r, results='asis'}
 (df <- rbind(df, data.frame('Lambda.Omega'='prop', 'cnst' = 'cnst-prop', 'prop' = 'prop-prop', 'dich' = 'dich-prop')) )%>% pandoc.table(., style='rmarkdown', split.tables = Inf, emphasize.strong.cols= 1)
@@ -145,7 +148,7 @@ We refer to this approach as `prop` (not to be confused with the `prop` labeling
 
 The log-ratio between the posterior probability of classifying an observation to $I_b$ and the posterior probability of classifying an observation to $I_a$ is a measure of how likely is to classify an observation to $I_b$ when the observation was in fact generated by component $I_a$. This measure can be used to measure how likely is to merge components $I_a$ and $I_b$.
 
-  * Consider $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = log(\tau_{i I_{b}} / \tau_{i I_{a}})$
+  * Consider ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = log(\tau_{i I_{b}} / \tau_{i I_{a}})$
 
 This approach allow us to introduce three new methods for merging components
 
@@ -157,7 +160,7 @@ This approach allow us to introduce three new methods for merging components
 
 Finally, using the norm defined on the Simplex (Aitchison) we can have a measure of entropy similar to the one introduced by Baudry et al. (2010). In this case, the measure has some desirable properties like scale-invariance and compositional-coherence.
 
-  * Consider $\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)} = - log(\tau_{i I_{b}} / \tau_{i I_{a}})^2$
+  * Consider ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = - log(\tau_{i I_{b}} / \tau_{i I_{a}})^2$
 
 We have three new methods
 
@@ -167,18 +170,96 @@ We have three new methods
 
 # Experiment: comparing the results for each aproach
 
-We have considered the following experiment. 
+In this part we would like to see if the previous approaches are usefull to approximate components. We would perform a very simple example, we are going to follow the following steps.
+ 
+ 1. We generate a sample from a finite mixture a certain number of components. For example, in the next plot we show three different mixtures with $K_0=3$ components generated using the package `MixSim` using different levels of overlapping $\hat{\omega} \in (0.1, 0.3, 0.5)$ (see Melnykov _et al._ (2012) for details). Note that for each observation we know the component from where it was generated. In other words, we have an initial classification $L_0$ which allow us to compare other clusters with the one given by the components from the generated finite mixture.
+ 
+```{r, fig.width=7, fig.height=2.5}
+set.seed(155)
+l_df = lapply(c(0.1, 0.3, 0.5), function(omega){
+  ms = MixSim(MaxOmega=omega, K=3, p=2, PiLow=0.01, sph=TRUE)
+  sim = simdataset(n=1000, Pi=ms$Pi, Mu=ms$Mu, S=ms$S)
+  cbind(sim$X,sim$id) %>% data.frame %>% mutate(omega = omega)
+}) 
+
+ggplot(data=l_df %>% bind_rows, aes(x=X1, y=X2, col=as.factor(X3))) + geom_point(alpha=0.2) + geom_density2d() + 
+  facet_wrap(~omega, scales = 'free')
+```
+
+ 2. To the data generated in step 1, we fit a mixture more components than the original one. For example, in the previous examples we can fit a finite mixture with 9 components.
+
+```{r, fig.width=7, fig.height=2.5}
+set.seed(155)
+l_df_7 = lapply(l_df, function(df){
+  mod = mixmodCluster(data.frame(df[,c('X1', 'X2')]),
+                      nbCluster=7,
+                      models=mixmodGaussianModel(listModels="Gaussian_pk_Lk_I"))
+  bind_cols(df, data.frame('part' = mod@bestResult@partition), mod@bestResult@proba %>% data.frame %>% setNames(paste0('t', 1:7)))
+})
+
+ggplot(data=l_df_7 %>% bind_rows, aes(x=X1, y=X2, col=as.factor(part))) + geom_point(alpha=0.2) + geom_density2d() + 
+  facet_wrap(~omega, scales = 'free')
+```
+
+After the fitting, each observation has a probability to belong to one component component
+
+```{r}
+l_df_7 %>% bind_rows %>% dplyr::select(starts_with('t')) %>% round(5) 
+```
+
+  3. With the matrix of posterior probabilities, we build a hierachy using methods explained in this talk. For example, using the DEMP aproach for the first dataset we get the following hierarchy
+
+```{r, fig.width=3.5, fig.height=3.5, results='hold'}
+data = l_df_7[[1]] %>% dplyr::select(starts_with('X'))
+tau = l_df_7[[1]] %>% dplyr::select(starts_with('t'))
+HP = get_hierarchical_partition(tau, 
+                                omega = function(v_tau, a) v_tau[a],
+                                function(v_tau, a, b) if(which.max(v_tau) == b) 1 else 0)
+for(lvl in length(HP):2){
+  hp = HP[[lvl]]
+  d = data %>% mutate(
+    'hp' = cluster_partition(tau = tau, partition = hp),
+    'lvl' = lvl)
+  p = ggplot(data=d, aes(x=X1, y=X2, col=hp)) + geom_point(alpha=0.2) + geom_density2d() + 
+    ggtitle(sprintf('Hierarchy at level %d', lvl)) +
+              theme(legend.position="bottom")
+  print(p)
+}
+```
+
+  4. After calculating the hierachy, we compare the components of the initial mixture and the components given at level 3. To compare this components, we compare the clusterings they define using the MAP criterion. For example, in previous example we would like to compare the following two clusterings.
+  
+```{r, fig.width=3.5, fig.height=3.5, results='hold'}
+ggplot(data=l_df[[1]], aes(x=X1, y=X2, col=as.factor(X3))) + geom_point(alpha=0.6) + geom_density2d() +
+  ggtitle('Initial MAP partition') +
+            theme(legend.position="bottom")
+
+hp = HP[[3]]
+d = data %>% mutate(
+  'hp' = cluster_partition(tau = tau, partition = hp),
+  'lvl' = lvl)
+p = ggplot(data=d, aes(x=X1, y=X2, col=hp)) + geom_point(alpha=0.6) + geom_density2d() + 
+  ggtitle(sprintf('Hierarchy at level %d', 3)) +
+            theme(legend.position="bottom")
+print(p)
+```
+
+To compare the clustering obtained using the initial MAP partition and the clustering using the three components at level $3$, we compute a measure of agreement between partitions as the classical Adjusted Rand Index (Rand, 1971).
+
+In general, we have considered the following steps. 
 
   * For differents values of $\hat{\omega} \in (0, 0.5)$,
   
     1. Generate a $X$ sample of $N_{\text{data}}$ observations following a mixtures of $K_0$ components. For each element from sample $X$ keep the label from the component it was generated to obtain a labeling $L_0$. The mixtures components are separated with fixed $\hat{\omega}$ maxoverlapping measure.
     2. Fit a mixture with $K_f$ components ($K_f > K_0$) to sample $X$ and calculate the posterior probabilities $\tau_i = \left(\tau_{i1}, \dots, \tau_{i K_f}\right)$ for each element $x_i \in X$ to obtain $T = \{ \tau_1, \dots, \tau_{N_{\text{data}}} \}$.
-    3. Obtain a hierachy $\mathcal{H}$ over the $K_f$ components using a fixed function $\color{red}{\lambda}$ and $\color{blue}{\omega}$.
-    4. Compare the classification given at level $K_0$ of hierarchy $\mathcal{H}$ with the classification given by $L_0$ obtaining and score $s_i$.
+    3. Obtain a hierachy $\mathcal{H}$ over the $K_f$ components using a fixed function ${\color{red}{\lambda}}$ and ${\color{blue}{\omega}}$.
+    4. Compare the classification given at level $K_0$ of hierarchy $\mathcal{H}$ with the classification given by $L_0$ using the Rand Index to obtain an score $s_i$.
 
-For each function $\color{red}{\lambda}$ and $\color{blue}{\omega}$ we have repeated the experiment $N_\text{sim}$ times and computes the mean $\bar{s} = \sum_{i=1}^{N_\text{sim}} s_i$
+For each function ${\color{red}{\lambda}}$ and ${\color{blue}{\omega}}$ we have repeated the experiment $N_\text{sim}$ times and computes the mean $\bar{s} = \sum_{i=1}^{N_\text{sim}} s_i$
 
 ## Results 
+
+A part from the methods presented in this talk, to compare, we have also computed a random hierarchy by randomly merging two components at each step. The results for the random hierarchy have been plot in each plot-cell in blue and compared to each method presented here. We have considered different scenarios showing similar results for this experiment.
 
 * $N_{\text{sim}} = 50$, $N_{\text{data}} = 200$, $K_0=3$, $K_f=9$, $\text{seed}=1$ and $\text{dimension}=5$.
 
@@ -206,3 +287,4 @@ res.mean = res %>% group_by(omega, lambda, overlap, method) %>% summarise(AR = m
 ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) + 
   facet_grid(omega~lambda) + theme_bw()
 ```
+
