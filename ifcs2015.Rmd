@@ -4,10 +4,10 @@ title: An integrated formulation for merging mixture components based on posteri
 author: "Marc Comas-Cufí, Josep Antoni Martín-Fernández and Glòria Mateu-Figueras"
 date: "July 8th, 2015"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     theme: cosmo
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 
