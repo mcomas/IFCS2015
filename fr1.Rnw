@@ -1,0 +1,57 @@
+\begin{frame}[t]
+\frametitle{Model based clustering}
+
+\begin{columns}[T]
+\begin{column}{0.33\textwidth}
+\only<1-2>{
+<<fig.width=4, fig.height=3>>=
+(p1c <- ggplot() + 
+  geom_histogram(data=df, aes(x=x, y = ..density..), binwidth=0.5, col='black', fill='white', alpha=0.6) +
+  geom_line(data=df.dens, aes(x=x, y=f1), size = 1, col = 'red', alpha=0.6) + 
+  geom_line(data=df.dens, aes(x=x, y=f2), size = 1, col = 'green', alpha=0.6) + 
+  geom_line(data=df.dens, aes(x=x, y=f3), size = 1, col = 'blue', alpha=0.6) + 
+  geom_segment(data=df, aes(x=x, xend=x, y=0, yend=0.01, col=class), alpha=1) + 
+  theme_bw() +  theme(legend.position="none", panel.grid=element_blank()) +xlim(v_xlim) + 
+   theme(axis.ticks.y = element_blank(), axis.text.y = element_blank()) + ylab(NULL) + xlab(NULL) +  
+   scale_color_manual(values = c("red", "green", "blue")))
+@
+}
+\only<3>{
+<<fig.width=4, fig.height=3>>=
+p1c + geom_line(data=df.dens,aes(x=x, y=f), size = 1)
+@
+}
+\end{column}
+\begin{column}{0.33\textwidth}
+\uncover<2->{%
+\only<1-2>{
+<<fig.width=4, fig.height=3>>=
+(p12c <- ggplot() + 
+  geom_histogram(data=df, aes(x=x, y = ..density..), binwidth=0.5, col='black', fill='white', alpha=0.6) +
+  geom_line(data=df.dens, aes(x=x, y=f1), size = 1, col = 'red', alpha=0.6) + 
+  geom_line(data=df.dens, aes(x=x, y=f2+f3), size = 1, col = 'blue', alpha=0.6) + 
+  geom_segment(data=df, aes(x=x, xend=x, y=0, yend=0.01, col=class), alpha=1) + 
+  theme_bw() + theme(legend.position="none", panel.grid=element_blank()) +xlim(v_xlim) + 
+   theme(axis.ticks.y = element_blank(), axis.text.y = element_blank()) + ylab(NULL) + xlab(NULL) +  
+   scale_color_manual(values = c("red", "blue", "blue")))
+@
+}
+\only<3>{
+<<fig.width=4, fig.height=3>>=
+p12c + geom_line(data=df.dens,aes(x=x, y=f), size = 1)
+@
+}
+}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Given the finite mixture
+\only<1>{\[ f(x) = {\color{red}\pi_1 f_1(x;\theta_1)} + {\color{green}\pi_2 f_2(x;\theta_2)} + {\color{blue}\pi_3 f_3(x;\theta_3)},\]}
+\only<2->{\[ f(x) = {\color{red}\pi_1 f_1(x;\theta_1)} + {\color{blue} (\pi_2+\pi_3)\left\{ \frac{\pi_2}{\pi_2+\pi_3} f_2(x;\theta_2) + \frac{\pi_3}{\pi_2+\pi_3} f_3(x;\theta_3) \right\}},\]}
+we assign an observation $x_i$ to the higher component
+\only<1>{ \[ \left({\color{red}\frac{\pi_1 f_1(x_i;\theta_1)}{\sum_{\ell=1}^3 \pi_\ell f_\ell(x_i;\theta_\ell)}}, {\color{green}\frac{\pi_2 f_2(x_i;\theta_2)}{\sum_{\ell=1}^3 \pi_\ell f_\ell(x_i;\theta_\ell)}}, {\color{blue}\frac{\pi_3 f_3(x_i;\theta_3)}{\sum_{\ell=1}^3 \pi_\ell f_\ell(x_i;\theta_\ell)}} \right) \] }
+\only<2->{ \[ \left({\color{red}\frac{\pi_1 f_1(x_i;\theta_1)}{\sum_{\ell=1}^3 \pi_\ell f_\ell(x_i;\theta_\ell)}}, {\color{blue}\frac{\pi_2 f_2(x_i;\theta_2) + \pi_3 f_3(x_i;\theta_3)}{\sum_{\ell=1}^3 \pi_\ell f_\ell(x_i;\theta_\ell)}} \right) \] }
+\only<3>{\alert{The underlying mixture in both cases is the same.}}
+\end{itemize}
+
+\end{frame}

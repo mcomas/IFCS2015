@@ -182,13 +182,13 @@ S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n
 
 \begin{itemize} 
 \item The DEMP approach. Hennig (2010)
-\begin{itemize} \item ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{a}}$ \item ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1{\hskip -2.4 pt}\hbox{I} \left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$ \end{itemize}
-\item The entropy approach.Baudry et el. (2010)
+\begin{itemize} \item ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{a}}$ \item ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \mathbbm{1} \left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$ \end{itemize}
+\item The entropy approach. Baudry et el. (2010)
 \begin{itemize} \item ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1$ \item ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = (\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$ \end{itemize}
 \item Longford \& Bartosova. Longford \& Bartosova (2014)
 \begin{itemize} \item ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1$ \item ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$ \end{itemize}
+\item<3-> ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \mathbbm{1} \left( \forall j\; \tau_{i I_{a}} \geq \tau_{iI_j} \right)$
 \item<4->  ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{b}}$
-
 \end{itemize}
 
 \begin{table}[ht]
@@ -198,9 +198,9 @@ S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n
   \hline
   ${\color{red}{\lambda}}$ $\backslash$ ${\color{blue}{\omega}}$ & {\color{blue}{cnst}} & {\color{blue}{prop}} & \uncover<3->{{\color{blue}{dich}}} \\ 
   \hline
- {\color{red}demp} & \uncover<2->{cnst-demp} & Hennig (2010) & \uncover<3->{dich-demp}\\ 
- {\color{red}demp.mod} & Longford \& Bartosova (2014) & \uncover<2->{prop-demp.mod} & \uncover<3->{dich-demp.mod}\\ 
- {\color{red}entr} & Baudry et al. (2010) & \uncover<2->{prop-entr} & \uncover<3->{dich-entr}\\ 
+ {\color{red}demp} & \uncover<2->{cnst-demp} & {\color{gg3}Hennig (2010)} & \uncover<3->{dich-demp}\\ 
+ {\color{red}demp.mod} & {\color{gg3}Longford \& Bartosova (2014)} & \uncover<2->{prop-demp.mod} & \uncover<3->{dich-demp.mod}\\ 
+ {\color{red}entr} & {\color{gg3}Baudry et al. (2010)} & \uncover<2->{prop-entr} & \uncover<3->{dich-entr}\\ 
  \uncover<4->{\color{red}prop} & \uncover<4->{cnst-prop} & \uncover<4->{prop-prop} & \uncover<4->{dich-prop}\\ 
    \hline
 \end{tabular}
@@ -209,10 +209,62 @@ S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n
 \end{frame}
 
 \section{Defining new approaches}
-\subsection{Using the indicator variables as a weighting function}
-\subsection{Using the posterior probability of being classified to $I_b$}
-\subsection{The log-ratio criterion}
-\subsection{The Aitchison distance ciretion}
+\begin{frame}
+\frametitle{Compositional data}
+
+\begin{itemize}
+\item Compositional data is data defined on the simplex space, which is defined as
+\[
+\mathcal{S}^k = \{ (\tau_1, \dots, \tau_k) : \tau_i > 0 (i = 1, 2, \dots, k), \sum_{i=1}^k \tau_i = 1 \text{ and } \}
+\]
+\item Compositional data carries only relative information, therefore, only ratios (or log-ratios) between components are of interest.
+\item The set $\mathcal{S}^k$ is a $(k-1)$-dimensional Euclidean space.
+\item To measure the relation between two components, we restrict to subcomposition $(\tau_{i I_a}, \tau_{i I_b})$
+\begin{itemize}
+\item The Log-ratio approach
+\[
+{\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = log(\tau_{i I_b}/ \tau_{i I_a})
+\]
+\item The Aitchison norm
+\[
+{\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = - log(\tau_{i I_b}/ \tau_{i I_a})^2
+\]
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Shown methods}
+\begin{table}[ht]
+\scriptsize
+\centering
+\begin{tabular}{llll}
+  \hline
+  ${\color{red}{\lambda}}$ $\backslash$ ${\color{blue}{\omega}}$ & {\color{blue}{cnst}} & {\color{blue}{prop}} & {\color{blue}{dich}} \\ 
+  \hline
+ \color{red}coda & cnst-coda & prop-coda & dich-coda\\
+ \color{red}coda.norm & cnst-coda.norm & prop-coda.norm & dich-coda.norm\\
+ \color{red}demp & cnst-demp & {\color{gg3}Hennig (2010)} & dich-demp\\ 
+ \color{red}demp.mod & {\color{gg3}Longford \& Bartosova (2014)} & prop-demp.mod & dich-demp.mod\\ 
+ \color{red}entr & {\color{gg3}Baudry et al. (2010)} & prop-entr & dich-entr\\ 
+ \color{red}prop & cnst-prop & prop-prop & dich-prop\\
+   \hline
+\end{tabular}
+\end{table}
+
+\begin{columns}[T]
+\begin{column}{0.9\textwidth}
+<<r, fig.width=9, fig.height=5>>=
+load('sim01/data/res_NSIM_050-NDATA_200-K0_003-Kf_009-DIM_005-SEED_001.RData')
+res.mean = res %>% group_by(omega, lambda, overlap, method) %>% summarise(AR = mean(AR))
+res.mean$omega = factor(res.mean$omega, levels = c('cnst', 'prop', 'dich'))
+ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) + 
+  facet_grid(omega~lambda) + theme_bw()
+@
+\end{column}
+\end{columns}
+
+\end{frame}
 
 \section{Experiment: comparinig the results for each approach}
 
