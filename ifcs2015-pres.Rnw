@@ -150,8 +150,10 @@ ggplot() +
 
 \section{Merging components based on the posterior probabilities}
 
+
 <<frm_problem, child='frm_problem.Rnw'>>=
 @
+
 
 \section{Our proposal: a generic merging method}
 
@@ -215,11 +217,11 @@ S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n
 \begin{itemize}
 \item Compositional data is data defined on the simplex space, which is defined as
 \[
-\mathcal{S}^k = \{ (\tau_1, \dots, \tau_k) : \tau_i > 0 (i = 1, 2, \dots, k), \sum_{i=1}^k \tau_i = 1 \text{ and } \}
+\mathcal{S}^k = \{ (\tau_1, \dots, \tau_k) : \tau_i > 0 \;(i = 1, 2, \dots, k) \text{ and } \sum_{i=1}^k \tau_i = 1 \}
 \]
 \item Compositional data carries only relative information, therefore, only ratios (or log-ratios) between components are of interest.
 \item The set $\mathcal{S}^k$ is a $(k-1)$-dimensional Euclidean space.
-\item To measure the relation between two components, we restrict to subcomposition $(\tau_{i I_a}, \tau_{i I_b})$
+\item To measure the relation between two components, $I_a$ and $I_b$, we restrict to subcomposition $(\tau_{i I_a}, \tau_{i I_b})$
 \begin{itemize}
 \item The Log-ratio approach
 \[
@@ -235,6 +237,11 @@ S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n
 
 \begin{frame}
 \frametitle{Shown methods}
+
+{\scriptsize \[
+S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n {\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} {\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}}}{\sum_{i=1}^n {\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)} }},
+\]}
+
 \begin{table}[ht]
 \scriptsize
 \centering
@@ -252,9 +259,68 @@ S_{\omega, \lambda}( \mathcal{T}_{\mathcal{I}_s}, I_a, I_b) = \frac{\sum_{i=1}^n
 \end{tabular}
 \end{table}
 
+{\scriptsize
+\begin{columns}[t]
+\begin{column}{0.1\textwidth}
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{itemize}
+\item[coda] ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = log(\tau_{i I_b}/ \tau_{i I_a})$
+\item[coda.norm] ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = - log(\tau_{i I_b}/ \tau_{i I_a})^2$
+\item[demp] ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \mathbbm{1} \left( \forall j\; \tau_{i I_{b}} \geq \tau_{iI_j} \right)$
+\item[demp.mod] ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \frac{\tau_{i I_{b}}}{\tau_{i I_{a}} + \tau_{i I_{b}}}$
+\item[entr] ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = (\tau_{i I_a}+\tau_{i I_b}) \log(\tau_{i I_a} + \tau_{i I_b}) - \left\{ \tau_{i I_a} \log(\tau_{i I_a}) + \tau_{i I_b} \log(\tau_{i I_b})\right\}$
+\item[prop] ${\color{red}{\lambda(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{b}}$
+\end{itemize}
+\end{column}
+
+\begin{column}{0.4\textwidth}
+\begin{itemize}
+\item[cnst] ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = 1$
+\item[prop] ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \tau_{i I_{a}}$
+\item[dich] ${\color{blue}{\omega(\tau_{i \mathcal{I}_s}, I_a, I_b)}} = \mathbbm{1} \left( \forall j\; \tau_{i I_{a}} \geq \tau_{iI_j} \right)$
+\end{itemize}
+\end{column}
+\end{columns}
+}
+\end{frame}
+
+\section{Experiment: comparinig the results for each approach}
+
+<<>>=
+SEED = 1980
+omega = 0.1
+lambda = ''
+@
+
+<<frm_simulation, child='frm_simulation.Rnw'>>=
+@
+
+<<>>=
+SEED = 1980
+omega = 0.3
+@
+
+<<frm_simulation2, child='frm_simulation.Rnw'>>=
+@
+
+<<>>=
+SEED = 1980
+omega = 0.5
+@
+
+<<frm_simulation3, child='frm_simulation.Rnw'>>=
+@
+
+\begin{frame}
+\frametitle{Results for the simulation example}
+\begin{itemize}
+\item $N_{\text{sim}} = 50$, $N_{\text{data}} = 200$, $K_0=3$, $K_f=9$, $\text{seed}=1$ and $\text{dimension}=5$
+\end{itemize}
+
 \begin{columns}[T]
 \begin{column}{0.9\textwidth}
-<<r, fig.width=9, fig.height=5>>=
+<<fig.width=9, fig.height=5>>=
 load('sim01/data/res_NSIM_050-NDATA_200-K0_003-Kf_009-DIM_005-SEED_001.RData')
 res.mean = res %>% group_by(omega, lambda, overlap, method) %>% summarise(AR = mean(AR))
 res.mean$omega = factor(res.mean$omega, levels = c('cnst', 'prop', 'dich'))
@@ -263,10 +329,15 @@ ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) +
 @
 \end{column}
 \end{columns}
-
 \end{frame}
 
-\section{Experiment: comparinig the results for each approach}
-
+\begin{frame}
+\frametitle{Conclusions}
+\begin{itemize}
+\item Methods based only on posterior probabilities for merging methods can be applied regardless the distribution type.
+\item The presented integrated formulation can be used to define new methodologies and can be used to compare other approaches.
+\item Compositional methods take into an account relative information from the components of interest. This methods are scale invariant and subcompositional coherent.
+\end{itemize}
+\end{frame}
 
 \end{document}

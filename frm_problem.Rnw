@@ -18,7 +18,7 @@ Given the probabilities that each observations belong to a component $I_j$ of a 
 \end{block}
 
 \begin{alertblock}{Goal}
-Merge components (sequentially) to obtain a hierarchy over the set of components % $\{C_1, \dots, C_k\}$. %In other words, obtain a binary tree with a set of leafs $\{C_1, \dots, C_k\}$
+Merge components (sequentially) to obtain a \emph{hierarchy} over the set of components % $\{C_1, \dots, C_k\}$. %In other words, obtain a binary tree with a set of leafs $\{C_1, \dots, C_k\}$
 \end{alertblock}
 
 \end{frame}
