@@ -288,3 +288,7 @@ ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) +
   facet_grid(omega~lambda) + theme_bw()
 ```
 
+# More material
+
+* The presentation [pdf](ifcs2015-pres.pdf)
+* The sources for the presentation and the scripts are available at [GitHub](http://github.com/mcomas/IFCS2015)

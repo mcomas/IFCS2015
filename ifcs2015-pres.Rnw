@@ -338,6 +338,15 @@ ggplot() + geom_line(data = res.mean, aes(x = overlap, y = AR, col = method)) +
 \item The presented integrated formulation can be used to define new methodologies and can be used to compare other approaches.
 \item Compositional methods take into an account relative information from the components of interest. This methods are scale invariant and subcompositional coherent.
 \end{itemize}
+
+\medskip
+\medskip
+\medskip
+\begin{itemize}
+\item[] {\small \color{blue} The material used for this presentation is available at http://mcomas.net/IFCS2015/}
+\end{itemize}
+
 \end{frame}
+
 
 \end{document}
